@@ -19,8 +19,10 @@
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
  */
-
 #pragma once
+
+#ifndef __ADSDEF_H__
+#define __ADSDEF_H__
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -241,7 +243,7 @@
 /**
  * @brief The NetId of and ADS device can be represented in this structure.
  */
-struct AmsNetId {
+typedef struct {
     /** NetId, consisting of 6 digits. */
     uint8_t b[6];
 
@@ -252,18 +254,18 @@ struct AmsNetId {
     bool operator<(const AmsNetId& rhs) const;
     operator bool() const;
 #endif
-};
+} AmsNetId;
 
 /**
  * @brief The complete address of an ADS device can be stored in this structure.
  */
-struct AmsAddr {
+typedef struct AmsAddr_{
     /** AMS Net Id */
     AmsNetId netId;
 
     /** AMS Port number */
     uint16_t port;
-};
+} AmsAddr, *PAmsAddr;
 
 #ifdef __cplusplus
 bool operator<(const AmsAddr& lhs, const AmsAddr& rhs);
@@ -273,7 +275,7 @@ std::ostream& operator<<(std::ostream& os, const AmsNetId& netId);
 /**
  * @brief The structure contains the version number, revision number and build number.
  */
-struct AdsVersion {
+typedef struct {
     /** Version number. */
     uint8_t version;
 
@@ -282,9 +284,9 @@ struct AdsVersion {
 
     /** Build number */
     uint16_t build;
-};
+} AdsVersion;
 
-enum ADSTRANSMODE {
+typedef enum {
     ADSTRANS_NOTRANS = 0,
     ADSTRANS_CLIENTCYCLE = 1,
     ADSTRANS_CLIENTONCHA = 2,
@@ -294,9 +296,9 @@ enum ADSTRANSMODE {
     ADSTRANS_SERVERONCHA2 = 6,
     ADSTRANS_CLIENT1REQ = 10,
     ADSTRANS_MAXMODES
-};
+} ADSTRANSMODE;
 
-enum ADSSTATE {
+typedef enum {
     ADSSTATE_INVALID = 0,
     ADSSTATE_IDLE = 1,
     ADSSTATE_RESET = 2,
@@ -318,7 +320,7 @@ enum ADSSTATE {
     ADSSTATE_INCOMPATIBLE = 18,
     ADSSTATE_EXCEPTION = 19,
     ADSSTATE_MAXSTATES
-};
+} ADSSTATE;
 
 /**
  * @brief This structure contains all the attributes for the definition of a notification.
@@ -348,7 +350,7 @@ enum ADSSTATE {
  * Tip: Set the cycle time to the most appropriate values, and always
  * close connections when they are no longer required.
  */
-struct AdsNotificationAttrib {
+typedef struct {
     /** Length of the data that is to be passed to the callback function. */
     uint32_t cbLength;
 
@@ -366,12 +368,12 @@ struct AdsNotificationAttrib {
         uint32_t nCycleTime;
         uint32_t dwChangeFilter;
     };
-};
+} AdsNotificationAttrib;
 
 /**
  * @brief This structure is also passed to the callback function.
  */
-struct AdsNotificationHeader {
+typedef struct {
     /** Contains a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (UTC). */
     uint64_t nTimeStamp;
 
@@ -380,7 +382,32 @@ struct AdsNotificationHeader {
 
     /** Number of bytes transferred. */
     uint32_t cbSampleSize;
-};
+} AdsNotificationHeader;
+
+/**
+ * @brief ADS symbol information added from Windown TC api. (e12058)
+ */
+typedef struct
+{
+#ifdef _WINNT
+	unsigned	long		entryLength;	// length of complete symbol entry
+	unsigned	long		iGroup;			// indexGroup of symbol: input, output etc.
+	unsigned	long		iOffs;			// indexOffset of symbol
+	unsigned	long		size;			// size of symbol ( in bytes, 0 = bit )
+	unsigned	long		dataType;		// adsDataType of symbol
+	unsigned	long		flags;			// see above
+#else
+    unsigned    int         entryLength;
+    unsigned    int         iGroup;
+    unsigned    int         iOffs;
+    unsigned    int         size;
+    unsigned    int         dataType;
+    unsigned    int         flags;
+#endif
+	unsigned	short		nameLength;		// length of symbol name (excl. \0)
+	unsigned	short		typeLength;		// length of type name (excl. \0)
+	unsigned	short		commentLength;	// length of comment (excl. \0)
+} AdsSymbolEntry, *PAdsSymbolEntry, **PPAdsSymbolEntry;
 
 /**
  * @brief Type definition of the callback function required by the AdsSyncAddDeviceNotificationReqEx() function.
@@ -391,41 +418,5 @@ struct AdsNotificationHeader {
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
 
-#define ADSSYMBOLFLAG_PERSISTENT    ((uint32_t)(1 << 0))
-#define ADSSYMBOLFLAG_BITVALUE      ((uint32_t)(1 << 1))
-#define ADSSYMBOLFLAG_REFERENCETO   ((uint32_t)(1 << 2))
-#define ADSSYMBOLFLAG_TYPEGUID      ((uint32_t)(1 << 3))
-#define ADSSYMBOLFLAG_TCCOMIFACEPTR ((uint32_t)(1 << 4))
-#define ADSSYMBOLFLAG_READONLY      ((uint32_t)(1 << 5))
-#define ADSSYMBOLFLAG_CONTEXTMASK   ((uint32_t)0xF00)
-
-/**
- * @brief This structure describes the header of ADS symbol information
- *
- * Calling AdsSyncReadWriteReqEx2 with IndexGroup == ADSIGRP_SYM_INFOBYNAMEEX
- * will return ADS symbol information in the provided readData buffer.
- * The header of that information is structured as AdsSymbolEntry and can
- * be followed by zero terminated strings for "symbol name", "type name"
- * and a "comment"
- */
-struct AdsSymbolEntry {
-    uint32_t entryLength; // length of complete symbol entry
-    uint32_t iGroup; // indexGroup of symbol: input, output etc.
-    uint32_t iOffs; // indexOffset of symbol
-    uint32_t size; // size of symbol ( in bytes, 0 = bit )
-    uint32_t dataType; // adsDataType of symbol
-    uint32_t flags; // see ADSSYMBOLFLAG_*
-    uint16_t nameLength; // length of symbol name (null terminating character not counted)
-    uint16_t typeLength; // length of type name (null terminating character not counted)
-    uint16_t commentLength; // length of comment (null terminating character not counted)
-};
-
-/**
- * @brief This structure is used to provide ADS symbol information for ADS SUM commands
- */
-struct AdsSymbolInfoByName {
-    uint32_t indexGroup;
-    uint32_t indexOffset;
-    uint32_t cbLength;
-};
 #pragma pack( pop )
+#endif  // __ADSDEF_H__
