@@ -2,7 +2,7 @@ This library is intended to provide easy use as ADS client applications running 
 
 To build this library a recent compiler with C++11 support is required. 
 
-Currently (2018-03-22) tested with:
+Currently (1-Feb-2019) tested with:
 ===================================
 FreeBSD 11.1 amd64      | clang 4.0.0
 macOS 10.13.3           | clang 900.0.39.2
@@ -10,6 +10,7 @@ Ubuntu 16.04 LTS x86_64 | gcc 6.3.0
 Win7 64-bit             | gcc 6.4.0 + cygwin64
 Win7 64-bit             | gcc 5.4.0 + cygwin32
 Win7 64-bit             | MS Visual C++ 2015 (untended)
+CentOS 7-3.1611 x86_64  | gcc 4.8.5
 
 
 compile & usage
