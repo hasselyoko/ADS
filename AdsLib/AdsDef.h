@@ -243,7 +243,7 @@
 /**
  * @brief The NetId of and ADS device can be represented in this structure.
  */
-typedef struct {
+struct AmsNetId{
     /** NetId, consisting of 6 digits. */
     uint8_t b[6];
 
@@ -254,7 +254,7 @@ typedef struct {
     bool operator<(const AmsNetId& rhs) const;
     operator bool() const;
 #endif
-} AmsNetId;
+};
 
 /**
  * @brief The complete address of an ADS device can be stored in this structure.
