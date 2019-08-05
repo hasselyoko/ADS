@@ -44,16 +44,24 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 
     auto conn = connections.find(ip);
     if (conn == connections.end()) {
-        conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
+		/** only add route if connection can be established */
+		AmsConnection *m_amsConnection = new AmsConnection { *this, ip };
 
-        /** in case no local AmsNetId was set previously, we derive one */
-        if (!localAddr) {
-            localAddr = AmsNetId {conn->second->ownIp};
-        }
+		if (m_amsConnection->ownIp != 0) {
+        	conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(m_amsConnection)).first;
+		} else {
+			LOG_INFO("Connection could not be established yet AMS route is not added");
+			return 0;
+		}
+
+    	/** in case no local AmsNetId was set previously, we derive one */
+    	if (!localAddr) {
+    	    localAddr = AmsNetId {conn->second->ownIp};
+    	}
     }
-
     conn->second->refCount++;
     mapping[ams] = conn->second.get();
+	LOG_INFO("ref count is " << conn->second->refCount);
     return !conn->second->ownIp;
 }
 
@@ -64,11 +72,15 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
     auto route = mapping.find(ams);
     if (route != mapping.end()) {
         AmsConnection* conn = route->second;
+		LOG_INFO("Route found reference count is " << conn->refCount);
         if (0 == --conn->refCount) {
             mapping.erase(route);
+			LOG_INFO("Route deleted from map");
             DeleteIfLastConnection(conn);
         }
-    }
+    } else {
+		LOG_INFO("Route is not found while attempting delete");
+	}
 }
 
 void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)

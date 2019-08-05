@@ -62,6 +62,7 @@ protected:
 struct TcpSocket : Socket {
     TcpSocket(IpV4 ip, uint16_t port);
     uint32_t Connect() const;
+    const uint32_t m_reconn_sec();
 };
 
 struct UdpSocket : Socket {

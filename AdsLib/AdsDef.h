@@ -259,13 +259,13 @@ struct AmsNetId{
 /**
  * @brief The complete address of an ADS device can be stored in this structure.
  */
-typedef struct AmsAddr_{
+struct AmsAddr {
     /** AMS Net Id */
     AmsNetId netId;
 
     /** AMS Port number */
     uint16_t port;
-} AmsAddr, *PAmsAddr;
+};
 
 #ifdef __cplusplus
 bool operator<(const AmsAddr& lhs, const AmsAddr& rhs);
